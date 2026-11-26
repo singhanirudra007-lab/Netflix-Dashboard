@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Netflix Content Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b0b0b;--panel:#141414;--card:#1c1c1c;--cell:#262626;--line:#2c2c2c;--tx:#f5f5f1;--mu:#8c8c8c;--red:#E50914;--red2:#b20710;--ok:#46d369;--g:#9b9b9b;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#e9e7e2;--panel:#fff;--card:#f6f5f2;--cell:#e8e6e1;--line:#dcdad4;--tx:#141414;--mu:#6b6b6b;--g:#777;color-scheme:light}}
+:root[data-theme="light"]{--bg:#e9e7e2;--panel:#fff;--card:#f6f5f2;--cell:#e8e6e1;--line:#dcdad4;--tx:#141414;--mu:#6b6b6b;--g:#777}
+:root[data-theme="dark"]{color-scheme:dark}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:radial-gradient(900px 500px at 10% 0,#5a0a10 0,transparent 60%),var(--bg);color:var(--tx);font-family:Inter,system-ui,sans-serif;font-size:13px;min-height:100vh;padding:16px}
+.app{display:grid;grid-template-columns:210px 1fr;gap:16px;max-width:1360px;margin:auto;background:#0a0a0a;border-radius:20px;padding:16px;background:var(--bg);border:1px solid var(--line)}
+.side,.card{background:var(--panel);border-radius:16px}
+.side{padding:18px 14px;display:flex;flex-direction:column;gap:6px;position:sticky;top:16px;align-self:start;min-height:calc(100vh - 66px)}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px;margin-bottom:14px;padding-left:4px}
+.logo b{color:var(--red);font-size:26px;font-weight:800;letter-spacing:-1px;font-family:"Bebas Neue",Impact,sans-serif}
+.nav{padding:11px 12px;border-radius:10px;color:var(--tx);cursor:pointer;display:flex;gap:10px;align-items:center;opacity:.85}
+.nav:hover{background:var(--card)}.nav.on{background:var(--card);color:var(--red);opacity:1;font-weight:600}
+.sp{flex:1}
+.main{display:flex;flex-direction:column;gap:16px;min-width:0}
+.top{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.search{flex:1;min-width:180px;background:var(--panel);border-radius:14px;padding:13px 16px;border:0;color:var(--tx);font:inherit}
+.pill{background:var(--panel);border-radius:14px;padding:12px 16px;display:flex;gap:8px;align-items:center}
+.live{width:8px;height:8px;border-radius:50%;background:var(--red);animation:p 1.6s infinite}
+@keyframes p{50%{opacity:.25}}
+select,.seg button{font:inherit;color:var(--tx);background:var(--panel);border:0;border-radius:14px;padding:12px 14px;cursor:pointer}
+.seg{display:flex;background:var(--panel);border-radius:14px;padding:4px}.seg button{padding:8px 14px;border-radius:10px;background:none}.seg button.on{background:var(--red);color:#fff}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.kpi{padding:16px 18px;border-radius:16px;background:var(--panel)}
+.kpi .h{display:flex;justify-content:space-between;align-items:center}
+.kpi .v{font-size:30px;font-weight:700;margin:14px 0 18px}.kpi .v i{color:var(--red);font-style:normal}
+.kpi small,.mu{color:var(--mu);font-size:11px}
+.bd{font-size:11px;padding:4px 8px;border-radius:8px;background:var(--card)}.up{color:var(--ok)}.dn{color:var(--red)}
+.row{display:grid;gap:16px}.r1{grid-template-columns:1fr 1.3fr}.r2{grid-template-columns:1fr 1.3fr}
+.card{padding:18px;min-width:0}.card h3{margin:0 0 14px;font-size:13px;font-weight:600;display:flex;justify-content:space-between;align-items:center}
+.heat{display:grid;grid-template-columns:70px repeat(5,1fr);gap:6px}
+.heat div{border-radius:8px;min-height:30px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff}
+.heat .l{justify-content:flex-start;color:var(--mu);background:none;font-size:11px;min-height:0}.heat .c{background:none;color:var(--mu);min-height:0;font-size:11px}
+.lg{display:flex;gap:8px;align-items:center;font-weight:400;color:var(--mu);font-size:10px}.lg s{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:3px}
+.chart{position:relative}svg{width:100%;height:auto;display:block}
+.tip{position:absolute;pointer-events:none;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:11px;min-width:130px;opacity:0;transition:opacity .15s;box-shadow:0 8px 24px #0006}
+.tip div{display:flex;justify-content:space-between;gap:14px;margin-top:5px}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.tile{background:var(--card);border-radius:12px;padding:12px;cursor:pointer;border:1px solid transparent;transition:.15s}
+.tile:hover{border-color:var(--red)}.tile.on{border-color:var(--red);background:#e5091422}
+.tile .f{font-size:20px}.tile b{display:block;font-size:16px;margin-top:6px}
+.tw{overflow-x:auto}table{width:100%;border-collapse:collapse;min-width:480px}
+th{text-align:left;font-weight:500;font-size:10px;color:var(--mu);background:var(--card);padding:10px;text-transform:uppercase}
+th:first-child{border-radius:8px 0 0 8px}th:last-child{border-radius:0 8px 8px 0}
+td{padding:12px 10px;border-bottom:1px solid var(--line)}tr:last-child td{border:0}
+.bar{height:4px;border-radius:2px;background:var(--cell);margin-top:5px;width:70px}.bar i{display:block;height:100%;border-radius:2px;background:var(--red)}
+.tag{padding:3px 8px;border-radius:6px;background:var(--card);font-size:11px}
+@media(max-width:1000px){.app{grid-template-columns:1fr}.side{position:static;min-height:0;flex-direction:row;overflow-x:auto}.side .sp,.logo span{display:none}.kpis{grid-template-columns:repeat(2,1fr)}.r1,.r2{grid-template-columns:1fr}}
+@media(max-width:520px){body{padding:8px}.kpis{grid-template-columns:1fr}.tiles{grid-template-columns:repeat(2,1fr)}}
+</style></head><body>
+<div class="app">
+<aside class="side">
+ <div class="logo"><b>N</b><span>Content Flow</span></div>
+ <div class="nav on">▦ Dashboard</div><div class="nav">🎬 Titles</div><div class="nav">🎭 Genres</div><div class="nav">🌍 Countries</div><div class="nav">⭐ Ratings</div><div class="nav">📈 Analysis</div>
+ <div class="sp"></div><div class="nav">⚙ Settings</div><div class="nav">? Help Center</div>
+</aside>
+<main class="main">
+ <div class="top">
+  <input class="search" id="q" placeholder="Search titles, genres…">
+  <div class="seg" id="seg"><button class="on" data-t="All">All</button><button data-t="Movie">Movies</button><button data-t="TV Show">TV Shows</button></div>
+  <select id="cs"></select>
+  <div class="pill"><span class="live"></span><span id="dt"></span></div>
+ </div>
+ <section class="kpis" id="kpis"></section>
+ <section class="row r1">
+  <div class="card"><h3>Views by genre &amp; maturity <span class="lg" id="lg"></span></h3><div class="heat" id="heat"></div></div>
+  <div class="card"><h3>Views by year added <span class="lg"><span><s style="background:#E50914"></s>Views (M)</span><span><s style="background:#9b9bff"></s>Titles added</span></span></h3><div class="chart" id="ch"></div></div>
+ </section>
+ <section class="row r2">
+  <div class="card"><h3>Views by country <span class="mu" id="clr" style="cursor:pointer">Clear</span></h3><div class="tiles" id="tiles"></div></div>
+  <div class="card"><h3>Top titles <span class="mu" id="cnt"></span></h3><div class="tw"><table id="tb"></table></div></div>
+ </section>
+</main></div>
+<script>
+const D=[["Wild Kingdom","TV Show","Comedy","UK",2012,"2016-01-02","PG-13",null,1,5.5,236],["Midnight Kingdom","Movie","Thriller","India",2012,"2016-01-19","TV-14",127,null,7.2,43],["Hidden River","Movie","Comedy","Spain",2012,"2017-01-20","TV-14",152,null,6.7,89],["Broken Kingdom","TV Show","Sci-Fi","Spain",2017,"2017-07-27","TV-14",null,4,6.1,242],["Last Echo","TV Show","Drama","UK",2013,"2018-08-01","R",null,3,7.9,194],["Lost Frontier","Movie","Comedy","India",2017,"2018-08-17","PG-13",147,null,5.7,89],["Velvet Horizon","TV Show","Romance","USA",2015,"2018-12-11","TV-PG",null,2,6.1,235],["Iron Letters","TV Show","Comedy","USA",2015,"2019-03-02","PG-13",null,3,8.5,250],["Velvet Kingdom","Movie","Thriller","USA",2019,"2019-03-09","R",159,null,6.1,99],["Electric Letters","Movie","Comedy","India",2014,"2019-06-20","TV-14",142,null,7.8,25],["Wild Legacy","TV Show","Thriller","UK",2016,"2019-07-20","TV-MA",null,5,5.7,29],["Midnight Promise","Movie","Drama","Japan",2019,"2019-09-19","TV-MA",109,null,7.3,96],["Silent Signal","TV Show","Thriller","South Korea",2016,"2020-01-20","R",null,6,6.4,190],["Wild Harbor","Movie","Thriller","India",2013,"2020-04-13","TV-14",141,null,7.8,9],["Golden Signal","Movie","Drama","USA",2013,"2020-04-21","PG-13",86,null,7.8,20],["Golden Verdict","Movie","Drama","USA",2012,"2020-06-08","R",120,null,7.5,46],["Neon Garden","Movie","Sci-Fi","UK",2014,"2020-07-02","TV-MA",92,null,8.1,110],["Electric Promise","Movie","Romance","India",2019,"2020-09-04","TV-14",115,null,7.0,58],["Velvet Letters","TV Show","Action","USA",2012,"2020-12-19","PG-13",null,3,7.6,116],["Last Horizon","Movie","Horror","South Korea",2012,"2021-03-26","R",121,null,5.9,76],["Lost Legacy","Movie","Action","USA",2020,"2021-05-25","TV-MA",88,null,7.0,5],["Paper Letters","Movie","Action","USA",2020,"2021-07-12","TV-14",97,null,5.4,24],["Last Verdict","Movie","Horror","USA",2013,"2021-11-06","R",135,null,8.7,66],["Quiet Verdict","TV Show","Action","USA",2017,"2021-11-23","R",null,1,7.8,239],["Last Promise","Movie","Drama","UK",2020,"2021-11-26","PG-13",132,null,7.9,16],["Electric Station","Movie","Action","India",2012,"2022-03-14","PG-13",96,null,6.9,110],["Burning Legacy","TV Show","Drama","South Korea",2022,"2022-04-13","PG-13",null,2,6.8,47],["Midnight Frontier","TV Show","Thriller","India",2012,"2022-05-04","TV-14",null,1,7.5,21],["Distant Voyage","TV Show","Comedy","USA",2015,"2022-07-22","TV-14",null,3,5.3,124],["Electric Verdict","TV Show","Romance","Spain",2020,"2022-07-24","TV-14",null,4,6.7,63],["Neon Letters","Movie","Drama","India",2022,"2022-08-26","PG-13",153,null,6.5,105],["Rising Verdict","TV Show","Drama","Japan",2015,"2022-11-05","PG-13",null,3,6.5,34],["Velvet Mirror","TV Show","Comedy","USA",2023,"2023-01-25","TV-14",null,5,5.3,239],["Savage Summer","Movie","Thriller","Spain",2023,"2023-04-05","TV-MA",144,null,7.7,41],["Hidden Empire","TV Show","Drama","UK",2021,"2023-04-27","R",null,5,5.6,238],["Velvet Empire","TV Show","Comedy","Spain",2017,"2023-05-01","TV-14",null,3,7.8,75],["Savage Voyage","Movie","Drama","USA",2023,"2023-05-27","PG-13",148,null,7.9,37],["Broken Letters","Movie","Thriller","South Korea",2014,"2023-06-26","R",111,null,6.1,39],["Golden Mirror","TV Show","Romance","Spain",2023,"2023-07-28","TV-14",null,4,7.9,200],["Iron Legacy","Movie","Documentary","Spain",2019,"2023-08-12","TV-PG",136,null,5.9,58],["Wild River","Movie","Romance","Spain",2018,"2023-09-09","TV-PG",146,null,7.0,49],["Hollow Summer","Movie","Documentary","Spain",2014,"2023-10-02","TV-14",122,null,6.9,52],["Last Alibi","TV Show","Action","India",2015,"2023-10-25","R",null,4,6.7,224],["Wild Letters","TV Show","Drama","USA",2021,"2023-11-02","TV-MA",null,3,5.2,80],["Silent Horizon","Movie","Sci-Fi","India",2017,"2024-02-05","TV-MA",122,null,7.1,81],["Burning Signal","Movie","Comedy","USA",2014,"2024-03-03","TV-14",95,null,6.3,54],["Velvet Signal","Movie","Documentary","UK",2015,"2024-06-04","TV-14",155,null,7.1,63],["Silent Verdict","Movie","Drama","UK",2017,"2024-08-28","R",90,null,8.6,115],["Iron Garden","TV Show","Drama","USA",2019,"2024-09-09","TV-14",null,5,8.7,50],["Neon Station","Movie","Thriller","Japan",2017,"2024-09-17","TV-MA",156,null,6.1,93],["Wild Horizon","Movie","Action","South Korea",2022,"2024-11-11","PG-13",130,null,5.6,26],["Wild Voyage","Movie","Thriller","Spain",2012,"2025-01-22","R",124,null,7.0,108],["Lost Verdict","Movie","Documentary","UK",2018,"2025-02-01","TV-PG",131,null,7.0,81],["Burning Alibi","Movie","Drama","Spain",2023,"2025-03-19","R",93,null,7.9,105],["Electric Garden","TV Show","Thriller","South Korea",2025,"2025-03-25","TV-MA",null,4,8.5,98],["Rising River","Movie","Drama","India",2022,"2025-04-05","TV-MA",83,null,8.9,59],["Broken Echo","TV Show","Action","UK",2020,"2025-04-27","R",null,2,6.9,100],["Rising Frontier","Movie","Sci-Fi","India",2023,"2025-05-13","TV-MA",129,null,8.0,78],["Hidden Mirror","TV Show","Romance","India",2025,"2025-05-27","TV-14",null,1,6.6,96],["Last Season","TV Show","Documentary","Spain",2021,"2025-06-06","TV-14",null,2,8.8,93],["Golden Legacy","TV Show","Comedy","India",2021,"2025-06-13","TV-14",null,5,8.6,229],["Last Legacy","TV Show","Comedy","USA",2018,"2025-08-01","PG-13",null,5,7.6,229],["Burning Horizon","Movie","Drama","Spain",2024,"2025-08-07","TV-MA",103,null,8.2,21],["Broken Station","Movie","Thriller","India",2020,"2025-08-08","TV-MA",103,null,7.2,120],["Crimson Verdict","TV Show","Romance","UK",2020,"2025-08-12","PG-13",null,5,8.2,31],["Silent Garden","Movie","Romance","South Korea",2024,"2025-08-18","TV-14",93,null,6.1,73],["Golden Horizon","Movie","Comedy","South Korea",2021,"2025-08-28","TV-PG",118,null,5.3,84],["Broken Voyage","Movie","Thriller","India",2022,"2025-10-06","R",147,null,5.4,44],["Savage Station","Movie","Action","USA",2023,"2025-10-09","R",95,null,8.7,33],["Hollow Echo","TV Show","Horror","USA",2025,"2025-10-27","TV-MA",null,3,6.6,159],["Quiet Harbor","TV Show","Drama","USA",2016,"2025-11-14","TV-MA",null,4,5.7,141],["Electric Horizon","Movie","Drama","UK",2022,"2025-11-25","TV-MA",104,null,6.8,17],["Electric River","Movie","Romance","Spain",2022,"2026-01-22","TV-PG",83,null,6.3,31],["Golden Summer","Movie","Drama","India",2012,"2026-02-27","TV-MA",118,null,8.1,66],["Crimson Letters","Movie","Drama","UK",2024,"2026-03-24","R",92,null,6.9,42],["Rising Empire","Movie","Comedy","USA",2026,"2026-04-19","TV-PG",115,null,6.6,83],["Paper Frontier","TV Show","Romance","Japan",2014,"2026-04-20","PG-13",null,4,5.9,167],["Quiet Echo","TV Show","Drama","South Korea",2017,"2026-04-21","R",null,1,5.9,245],["Iron River","Movie","Thriller","Japan",2018,"2026-05-10","TV-MA",109,null,5.8,15],["Crimson Summer","Movie","Drama","India",2014,"2026-05-13","PG-13",115,null,7.4,6],["Wild Orbit","TV Show","Thriller","USA",2026,"2026-05-14","TV-MA",null,3,8.3,118],["Wild Signal","Movie","Romance","USA",2026,"2026-05-20","TV-PG",89,null,6.0,91],["Lost Alibi","Movie","Romance","Japan",2026,"2026-05-27","TV-PG",100,null,5.7,108],["Rising Garden","TV Show","Drama","UK",2026,"2026-06-02","TV-MA",null,5,8.5,247],["Iron Signal","Movie","Romance","USA",2012,"2026-06-04","TV-PG",131,null,8.1,81],["Rising Signal","Movie","Drama","India",2026,"2026-06-05","TV-MA",85,null,7.8,8],["Broken Frontier","Movie","Action","India",2026,"2026-07-21","PG-13",85,null,6.8,52],["Paper Alibi","TV Show","Documentary","South Korea",2021,"2026-07-28","TV-PG",null,2,7.7,180],["Iron Voyage","Movie","Drama","South Korea",2026,"2026-08-05","TV-MA",150,null,6.5,81],["Hollow Alibi","Movie","Action","UK",2026,"2026-08-08","TV-MA",145,null,5.8,26],["Lost Letters","TV Show","Thriller","USA",2026,"2026-08-10","TV-14",null,6,6.8,10],["Distant Legacy","Movie","Sci-Fi","India",2026,"2026-08-17","TV-14",157,null,5.5,30],["Electric Voyage","TV Show","Thriller","India",2023,"2026-08-27","TV-MA",null,5,6.8,188],["Burning Harbor","Movie","Action","South Korea",2026,"2026-09-07","TV-14",116,null,7.9,43],["Silent Season","Movie","Drama","USA",2025,"2026-09-24","PG-13",123,null,7.3,26],["Iron Frontier","TV Show","Drama","USA",2026,"2026-09-26","R",null,6,7.8,224],["Hollow Legacy","Movie","Drama","USA",2021,"2026-10-02","TV-MA",145,null,8.1,77],["Midnight Signal","TV Show","Romance","South Korea",2026,"2026-10-05","TV-PG",null,6,8.4,182],["Iron Mirror","Movie","Drama","Spain",2025,"2026-10-19","PG-13",109,null,6.8,38],["Lost Voyage","TV Show","Drama","USA",2025,"2026-10-25","PG-13",null,3,8.5,50]];
+const T=0,TY=1,G=2,C=3,R=4,AD=5,M=6,DU=7,S=8,I=9,V=10;
+const FL={USA:"🇺🇸",UK:"🇬🇧",India:"🇮🇳",Spain:"🇪🇸",Japan:"🇯🇵","South Korea":"🇰🇷"};
+const RT=["TV-PG","PG-13","TV-14","R","TV-MA"];
+const st={t:"All",c:"All",q:""};
+const $=id=>document.getElementById(id),sum=(a,f)=>a.reduce((s,x)=>s+f(x),0),fmt=n=>n.toLocaleString("en-US");
+const countries=[...new Set(D.map(d=>d[C]))].sort();
+$("cs").innerHTML='<option>All</option>'+countries.map(c=>`<option>${c}</option>`).join("");
+$("dt").textContent=new Date().toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short",year:"numeric"});
+const base=D;const oT=base.length,oV=sum(base,d=>d[V]),oI=sum(base,d=>d[I])/oT,oA=oV/oT;
+function filt(skipC){return D.filter(d=>(st.t=="All"||d[TY]==st.t)&&(skipC||st.c=="All"||d[C]==st.c)&&(!st.q||(d[T]+d[G]+d[C]).toLowerCase().includes(st.q)))}
+function bd(x,suf){const u=x>=0;return `<span class="bd ${u?"up":"dn"}">${u?"↗":"↘"} ${u?"+":""}${x.toFixed(1)}${suf}</span>`}
+function render(){
+ const f=filt(),n=f.length,v=sum(f,d=>d[V]),i=n?sum(f,d=>d[I])/n:0,a=n?v/n:0;
+ const yrs=f.map(d=>+d[AD].slice(0,4)),span=n?`From ${Math.min(...yrs)} To ${Math.max(...yrs)}`:"No data";
+ const k=[["Total Titles",fmt(n),`<span class="bd">${(n/oT*100).toFixed(0)}% of catalog</span>`],
+  ["Total Views",`${fmt(v)}<i>M</i>`,`<span class="bd">${(v/oV*100).toFixed(0)}% of all views</span>`],
+  ["Avg IMDb Score",`<i>★</i> ${i.toFixed(2)}`,bd(i-oI," vs avg")],
+  ["Avg Views / Title",`${a.toFixed(1)}<i>M</i>`,bd((a/oA-1)*100,"%")]];
+ $("kpis").innerHTML=k.map(x=>`<div class="kpi"><div class="h"><span>${x[0]}</span>${x[2]}</div><div class="v">${x[1]}</div><small>${span}</small></div>`).join("");
+ // heatmap
+ const gs=[...new Set(D.map(d=>d[G]))].map(g=>[g,sum(D.filter(d=>d[G]==g),d=>d[V])]).sort((a,b)=>b[1]-a[1]).map(x=>x[0]);
+ const m={};f.forEach(d=>{const k=d[G]+"|"+d[M];m[k]=(m[k]||0)+d[V]});
+ const mx=Math.max(1,...Object.values(m));
+ const lv=x=>x==0?0:x<mx*.2?1:x<mx*.45?2:x<mx*.75?3:4;
+ const bg=["var(--cell)","repeating-linear-gradient(45deg,#6b0d12 0 2px,#2a1214 2px 5px)","repeating-linear-gradient(45deg,#a50f17 0 2px,#3a1316 2px 5px)","#b20710","#E50914"];
+ let h='<div class="l"></div>'+RT.map(r=>`<div class="c">${r}</div>`).join("");
+ gs.forEach(g=>{h+=`<div class="l">${g}</div>`+RT.map(r=>{const x=m[g+"|"+r]||0;return `<div title="${g} · ${r}: ${x}M views" style="background:${bg[lv(x)]}">${x||""}</div>`}).join("")});
+ $("heat").innerHTML=h;
+ $("lg").innerHTML=[.2,.45,.75,1].map((p,j)=>`<span><s style="background:${["#6b0d12","#a50f17","#b20710","#E50914"][j]}"></s>${Math.round(mx*p)}&lt;</span>`).join("");
+ // line chart
+ const ys=[...new Set(D.map(d=>+d[AD].slice(0,4)))].sort(),vy=ys.map(y=>sum(f.filter(d=>+d[AD].slice(0,4)==y),d=>d[V])),ty=ys.map(y=>f.filter(d=>+d[AD].slice(0,4)==y).length);
+ const W=600,H=250,p={l:40,r:10,t:10,b:28},vm=Math.max(1,...vy)*1.1,tm=Math.max(1,...ty)*1.1;
+ const X=j=>p.l+j*(W-p.l-p.r)/(ys.length-1),Yv=x=>H-p.b-x/vm*(H-p.t-p.b),Yt=x=>H-p.b-x/tm*(H-p.t-p.b);
+ const path=(arr,Y)=>{const P=arr.map((x,j)=>[X(j),Y(x)]);let d=`M${P[0][0]},${P[0][1]}`;for(let j=0;j<P.length-1;j++){const a=P[j-1]||P[j],b=P[j],c=P[j+1],e=P[j+2]||c;d+=`C${b[0]+(c[0]-a[0])/6},${b[1]+(c[1]-a[1])/6} ${c[0]-(e[0]-b[0])/6},${c[1]-(e[1]-b[1])/6} ${c[0]},${c[1]}`}return d};
+ let g="";for(let j=0;j<=4;j++){const y=H-p.b-j*(H-p.t-p.b)/4;g+=`<line x1="${p.l}" x2="${W-p.r}" y1="${y}" y2="${y}" stroke="var(--line)"/><text x="${p.l-6}" y="${y+3}" text-anchor="end" fill="var(--mu)" font-size="10">${Math.round(vm*j/4)}</text>`}
+ ys.forEach((y,j)=>g+=`<text x="${X(j)}" y="${H-8}" text-anchor="middle" fill="var(--mu)" font-size="10">${y}</text>`);
+ $("ch").innerHTML=`<svg viewBox="0 0 ${W} ${H}" id="sv">${g}<path d="${path(ty,Yt)}" fill="none" stroke="#9b9bff" stroke-width="2"/><path d="${path(vy,Yv)}" fill="none" stroke="#E50914" stroke-width="2.5"/><g id="hv" style="display:none"><line id="hl" y1="${p.t}" y2="${H-p.b}" stroke="var(--mu)" stroke-dasharray="4"/><circle id="d1" r="5" fill="#E50914" stroke="#fff"/><circle id="d2" r="5" fill="#9b9bff" stroke="#fff"/></g></svg><div class="tip" id="tp"></div>`;
+ const sv=$("sv"),tp=$("tp");
+ sv.onmousemove=sv.ontouchmove=e=>{const r=sv.getBoundingClientRect(),cx=(e.touches?e.touches[0].clientX:e.clientX),px=(cx-r.left)/r.width*W;let j=Math.round((px-p.l)/((W-p.l-p.r)/(ys.length-1)));j=Math.max(0,Math.min(ys.length-1,j));
+  $("hv").style.display="";$("hl").setAttribute("x1",X(j));$("hl").setAttribute("x2",X(j));$("d1").setAttribute("cx",X(j));$("d1").setAttribute("cy",Yv(vy[j]));$("d2").setAttribute("cx",X(j));$("d2").setAttribute("cy",Yt(ty[j]));
+  tp.innerHTML=`<b>${ys[j]}</b><div><span>🔴 Views</span><b>${fmt(vy[j])}M</b></div><div><span>🟣 Titles</span><b>${ty[j]}</b></div>`;tp.style.opacity=1;
+  const lx=X(j)/W*r.width;tp.style.left=Math.min(lx+14,r.width-150)+"px";tp.style.top="10px"};
+ sv.onmouseleave=()=>{$("hv").style.display="none";tp.style.opacity=0};
+ // country tiles
+ const fc=filt(true),cv=countries.map(c=>[c,sum(fc.filter(d=>d[C]==c),d=>d[V]),fc.filter(d=>d[C]==c).length]).sort((a,b)=>b[1]-a[1]);
+ $("tiles").innerHTML=cv.map(x=>`<div class="tile ${st.c==x[0]?"on":""}" data-c="${x[0]}"><span class="f">${FL[x[0]]||"🌐"}</span><div style="margin-top:6px">${x[0]}</div><b>${fmt(x[1])}M <span class="mu" style="font-weight:400">views</span></b><span class="mu">${x[2]} titles</span></div>`).join("");
+ document.querySelectorAll(".tile").forEach(t=>t.onclick=()=>{st.c=st.c==t.dataset.c?"All":t.dataset.c;$("cs").value=st.c;render()});
+ // table
+ const top=[...f].sort((a,b)=>b[V]-a[V]).slice(0,7),tm2=top[0]?top[0][V]:1;
+ $("cnt").textContent=`${n} titles`;
+ $("tb").innerHTML=`<tr><th>Title</th><th>Genre</th><th>Views</th><th>IMDb</th><th>Type</th><th>Country</th></tr>`+top.map(d=>`<tr><td><b>${d[T]}</b><div class="mu">${d[R]} · ${d[AD].slice(0,4)}</div></td><td>${d[G]}</td><td>${d[V]}M<div class="bar"><i style="width:${d[V]/tm2*100}%"></i></div></td><td class="${d[I]>=7?"up":""}">★ ${d[I].toFixed(1)}</td><td><span class="tag">${d[TY]}</span></td><td>${FL[d[C]]||""} ${d[C]}</td></tr>`).join("");
+}
+$("q").oninput=e=>{st.q=e.target.value.trim().toLowerCase();render()};
+$("cs").onchange=e=>{st.c=e.target.value;render()};
+$("clr").onclick=()=>{st.c="All";$("cs").value="All";render()};
+document.querySelectorAll("#seg button").forEach(b=>b.onclick=()=>{document.querySelectorAll("#seg button").forEach(x=>x.classList.remove("on"));b.classList.add("on");st.t=b.dataset.t;render()});
+document.querySelectorAll(".nav").forEach(n=>n.onclick=()=>{document.querySelectorAll(".nav").forEach(x=>x.classList.remove("on"));n.classList.add("on")});
+render();
+</script></body></html>
